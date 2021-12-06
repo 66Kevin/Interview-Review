@@ -466,3 +466,78 @@ vgg.28.bias - torch.Size([512])
 ```
 
 参数名的命名规则`属性名称.参数属于的层的编号.weight/bias`。 这在`fine-tuning`的时候，给一些特定的层的参数赋值是非常方便的，这点在后面在加载预训练模型时会看到。
+
+
+
+## 数据增强
+
+## 基本结构：
+
+```python
+# 自定义数据集
+class experimental_dataset(Dataset):
+		# 注意在这里的参数要有transform
+    def __init__(self, data, transform):
+        self.data = data
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.data.shape[0])
+
+    def __getitem__(self, idx):
+        item = self.data[idx]
+        item = self.transform(item)
+        return item
+# ---------------------------------------------
+   # 自定义数据增强函数
+    transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor()
+    ])
+
+x = torch.rand(8, 1, 2, 2)
+
+train_data = experimental_dataset(x, transform)
+train_dataloader = DataLoader(train_data, batch_size=64, shuffle=True, num_workers=0)
+
+```
+
+
+
+## 注意事项
+
+**注意**：数据增强不会增加数据集的size，只是会从一个batch中随机挑取数据进行数据增强，所以数据集的size还是和原来一样
+
+如果想增加数据集：```increased_dataset = torch.utils.data.ConcatDataset([transformed_dataset,original])```
+
+```python
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+}
+```
+
+What your `data_transforms['train']` does is:
+
+- Randomly resize the provided image and randomly crop it to obtain a `(224, 224)` patch
+- Apply or not a random horizontal flip to **this patch**, with a 50/50 chance
+- Convert **it** to a `Tensor`
+- Normalize the resulting `Tensor`, given the mean and deviation values you provided
+
+What your `data_transforms['val']` does is:
+
+- Resize your image to `(256, 256)`
+- Center crop the **resized image** to obtain a `(224, 224)` patch
+- Convert **it** to a `Tensor`
+- Normalize the resulting `Tensor`, given the mean and deviation values you provided
