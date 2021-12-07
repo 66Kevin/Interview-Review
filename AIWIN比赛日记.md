@@ -21,5 +21,5 @@
    
       先在training set中选取一小部分当作test set，再从剩余的training set中分成K折进行交叉验证（即K-1用来训练，K折用来验证），虽然training set分成了K折但是每一折都会经历训练的过程，并且保证每一折在验证时，都能保证模型使用没有见过的数据进行验证模型效果。保存下来每一折中最优模型（即val最高的那个epoch的模型），记录下来模型大概的训练轮次，拿交叉验证中得到的经验来训练整个training set。最后用Test set来测试每折最优的模型与整个训练集得到的模型，选最优的模型即可。
    
-      <img src="/Users/kevin/Library/Application Support/typora-user-images/IMG_1858.jpg" alt="IMG_1858" style="zoom:25%;" />
+      <img src="/assets/IMG_1858.jpg" alt="IMG_1858" style="zoom:25%;" />
 
