@@ -1,5 +1,7 @@
 # Deep Learning复习
 
+[TOC]
+
 ## 一.General
 
 ### 1. 不同数据集下使用微调：
@@ -16,7 +18,7 @@
 
    用了大型数据集做训练，已经具备了**提取浅层基础特征和深层抽象特征的能力**。
 
-### 3. 感受野：
+### 3. 感受野是什么？
 现在的一个像素对应原来的多少个像素
 
 ### 4. 说说Batch Normalization的原理及作用？
@@ -90,15 +92,13 @@ BN在训练的时候可以根据Mini-Batch里的若干训练实例进行激活�
 
 #### 4.12 Instance Normalization
 
+### 4.13 Transformer为什么用LN不用BN？
+
 ### 损失函数
 
 #### Focal Loss
 
 Focal loss主要是为了解决one-stage目标检测中正负样本比例严重失衡的问题。该损失函数降低了大量简单负样本在训练中所占的权重，也可理解为一种困难样本挖掘。
-
-
-
-
 
 
 
@@ -143,4 +143,120 @@ SENet主要是学习了channel之间的相关性，筛选出了针对通道的�
 ![image-20211130230948340](/Users/kevin/Library/Application Support/typora-user-images/image-20211130230948340.png)
 
 ## 循环神经网络RNN
+
+### RNN梯度消失真正的含义？与DNN梯度消失一样吗
+
+## Transformer
+
+### 输入
+
+#### Encoder输入
+
+##### Embedding
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211209170201006.png" alt="image-20211209170201006" style="zoom:30%;" />
+
+例如一个词组长度为12，每一个字可以编码成$$（1*512）$$维的embedding，一个12长度的词组就组成了$$（12*512）$$维的embedding矩阵。
+
+##### Positional Embedding
+
+对于每个词都有一个$（1*512）$维的positional embedding，一个12长度的词组就组成了$$（12*512）$$维的positional embedding矩阵。因此整个encoder的输入就是：（下图以某个词为例子）
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211209170002772.png" alt="image-20211209170002772" style="zoom:30%;" />
+
+#### Decoder输入
+
+### 为什么需要位置编码？
+
+在RNN中的是从头到尾按照顺序依次处理，天然包含了句子之间的位置信息，比如词组“我爱你”，按照我，爱，你的顺序能提取到位置信息。而Transformer中所有的数据并行处理，因此无法获取到词组中各个单词的位置信息，模型就没有办法知道每个单词在句子中的相对位置和绝对位置信息。所以引入了位置编码。
+
+位置编码（Positional Encoding）是不需要训练的，它有一套自己的生成方式，我们只需要把位置向量加到原来的输入embedding向量中，就能让Transformer中包含句子的位置信息。
+
+#### 公式：
+
+​																			$$PE_{pos, 2i} = sin(\frac{pos}{10000^{2i/d_{model}}})$$
+
+​																			$$PE_{pos, 2i+1} = cos(\frac{pos}{10000^{2i/d_{model}}})$$
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211209172937383.png" alt="image-20211209172937383" style="zoom:50%;" />
+
+图中，以“爱”字512维的positional embedding为例，2i表示偶数位置，2i+1表示奇数位置，偶数位置用sin函数，奇数位置用cos函数
+
+#### 为什么用sin和cos来编码位置关系？
+
+因为三角函数有个性质：**由于三角函数的周期性，随着$pos$的增加，相同维度的值有周期性变化的特点**
+
+​																		$$               sin(a+b) = sin(a) * cos(b) + cos(a) * sin(b)$$
+
+​																		$$cos(a+b) = cos(a) * cos(b) - sin(a) * sin(b)$$
+
+可以推导出，两个位置向量的点积与他们两个位置差值（即相对位置）有关，而与绝对位置无关。这个性质使得在计算注意力权重的时候(两个向量做点积)，使得相对位置对注意力发生影响，而绝对位置变化不会对注意力有任何影响，这更符合常理。
+
+比如”我爱中华“这句话，”华“与”中“相对位置为1，华与中的相关性程度取决于相对位置值1。而如果这句话前面还有其他字符，那华和中两个字的绝对位置会变化，这个变化不会影响到中华这两个字的相关程度。
+
+但是这里似乎有个缺陷，就是这个相对位置没有正负之分，比如"华"在"中"的后面，对于"中"字，"华"相对位置值应该是1，而"爱"在"中"的前面，相对位置仍然是1，这就没法区分到底是前面的还是后面的。
+
+transformer的位置向量还有一种生成方式是可训练位置向量。即随机初始化一个向量，然后由模型自动训练出最可能的向量。transformer的作者指出这种可训练向量方式的效果与正玄余玄编码方式的效果差不多。在bert的代码中采用的是可训练向量方式。
+
+
+
+##### 代码实现位置编码
+
+```python
+class PositionalEncoding(nn.Module):
+    def __init__(self,d_model,dropout,max_len=5000):
+        """
+        :param d_model:embedding的维度
+        :param dropout: Dropout的置零比例
+        :param max_len: 每个句子的最大长度
+        """
+        super(PositionalEncoding, self).__init__()
+        #实例化Dropout层
+        self.dropout = nn.Dropout(p=dropout)
+        #初始一个位置编码矩阵，pe维度为max_len*d_model
+        pe = torch.zeros(max_len,d_model)
+        #初始化一个绝对位置矩阵，词汇的位置就是用它的索引表示，position维度为max_len*1
+        position = torch.arange(0,max_len).unsqueeze(1)#由[0,1,2...max_len] -> [[0],[1]...[max_len]]
+
+        #定义一个变换矩阵使得position的[max_len,1]*变换矩阵得到pe[max_len,d_model]->变换矩阵格式[1,d_model]
+        #除以这个是为了加快收敛速度
+        #div_term格式是[0,1,2...d_model/2],分成了两个部分，步长为2
+        div_term = torch.exp(torch.arange(0,d_model,2)*-(math.log(10000.0)/d_model))
+
+        #将前面定义好的矩阵进行奇数偶数赋值
+        pe[:,0::2] = torch.sin(position*div_term) # 从0开始步长为2（偶数）
+        pe[:,1::2] = torch.cos(position*div_term) # 从1开始步长为2（奇数）
+
+        #此时pe[max_len,d_model]
+        #embedding三维(可以是[batch_size,vocab,d_model])#vocab就是max_len
+        #将pe升起一个维度扩充成三维张量
+        pe = pe.unsqueeze(0)
+
+        #位置编码矩阵注册成模型的buffer，它不是模型中的参数，不会跟随优化器进行优化
+        #注册成buffer后我们就可以在模型的保存和加载时，将这个位置编码器和模型参数加载进来
+        self.register_buffer('pe',pe)
+
+
+    def forward(self,x):
+        """
+        :param x:x代表文本序列的词嵌入
+        pe编码过长将第二个维度也就是max_len的维度缩小成句子的长度
+        """
+        x = x + Variable(self.pe[:,:x.size(1)],requires_grad=False)
+        return self.dropout(x)
+
+
+x = torch.LongTensor([[1,2,3,4],[5,6,7,8]])#[2,4]
+emb = Embeddings(d_model,vocab)#[2,4,512]
+embr = emb(x)
+pe = PositionalEncoding(d_model,dropout=0.2,max_len=50)
+pe_result = pe(embr)
+#
+print(pe_result)
+print(pe_result.shape)#[2,4,512]
+```
+
+
+
+
 
