@@ -21,5 +21,51 @@
    
       先在training set中选取一小部分当作test set，再从剩余的training set中分成K折进行交叉验证（即K-1用来训练，K折用来验证），虽然training set分成了K折但是每一折都会经历训练的过程，并且保证每一折在验证时，都能保证模型使用没有见过的数据进行验证模型效果。保存下来每一折中最优模型（即val最高的那个epoch的模型），记录下来模型大概的训练轮次，拿交叉验证中得到的经验来训练整个training set。最后用Test set来测试每折最优的模型与整个训练集得到的模型，选最优的模型即可。
    
-      <img src="/assets/IMG_1858.jpg" alt="IMG_1858" style="zoom:25%;" />
+      <img src="/Users/kevin/Library/Application Support/typora-user-images/IMG_1858.jpg" alt="IMG_1858" style="zoom:25%;" />
 
+4. 保存loss和accury数据尽量用dict
+
+   ```python
+       history = {'train_loss': [], 'test_loss': [],'train_acc':[],'test_acc':[]}
+       for epoch in range(num_epochs):
+           train_loss, train_correct=train_epoch(model,device,train_loader,criterion,optimizer)
+           test_loss, test_correct=valid_epoch(model,device,test_loader,criterion)
+   
+           train_loss = train_loss / len(train_loader.sampler)
+           train_acc = train_correct / len(train_loader.sampler) * 100
+           test_loss = test_loss / len(test_loader.sampler)
+           test_acc = test_correct / len(test_loader.sampler) * 100
+   
+           print("Epoch:{}/{} AVG Training Loss:{:.3f} AVG Test Loss:{:.3f} AVG Training Acc {:.2f} % AVG Test Acc {:.2f} 					%".format(epoch + 1, num_epochs,train_loss,test_loss,train_acc,test_acc))
+           
+           history['train_loss'].append(train_loss)
+           history['test_loss'].append(test_loss)
+           history['train_acc'].append(train_acc)
+           history['test_acc'].append(test_acc)
+   ```
+
+5. BN-ReLu-ConV效果比Conv-BN-ReLu好
+
+6. Transformer爆显存问题
+
+   ```python
+   RuntimeError: CUDA out of memory. Tried to allocate 192.00 MiB (GPU 0; 31.75 GiB total capacity; 29.69 GiB already allocated; 55.50 MiB free; 30.39 GiB reserved in total by PyTorch)
+   ```
+
+    解决方案：
+
+   1. 查看某个时间点显存占用的状态：用显存观察代码（电路表）掐在每一个能使得显存变化的位置上，比如将model.cuda()，tensor.to(device)的前后进行监控
+
+      ```python
+      import pynvml
+      pynvml.nvmlInit()
+      handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+      meminfo = pynvml.nvmlDeviceGetMemoryInfo(handle)
+      print(meminfo.used)
+      ```
+
+	2. 分析模型：发现，显存爆炸的地方出现在了句子length达到了4960的长度，远远大于最大长度512. Transformer由多层的encoder组成，恐怖的地方在于多层transformer的可怕规模的计算图。也就是说如果句子长度大于512这个数量级，那么即使是4的batch size都在每一次构建model计算图时吃掉10+GB的显存
+	
+	反思：
+	
+	1. 深入了解pytorch机制，什么会影响显存？大型计算图中，像transformer，哪里容易累积梯度和cache？
