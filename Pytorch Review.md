@@ -54,6 +54,17 @@ tensor([[1., 1., 1., 1.],
 1990030519736
 ```
 
+如果 tensor 需要求导的话，还需要加一步 detach，再转成 Numpy 。
+
+```python
+x  = torch.rand([3,3], device='cuda')
+x_ = x.cpu().numpy()
+
+y  = torch.rand([3,3], requires_grad=True, device='cuda').
+y_ = y.cpu().detach().numpy()
+# y_ = y.detach().cpu().numpy() 也可以
+```
+
 ### 1.3 CPU tensor转numpy
 
 ```python
@@ -126,15 +137,41 @@ sys     0m0,308s
 
 ## Pytorch的动态计算图
 
-<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211216011059363.png" alt="image-20211216011059363" style="zoom:40%;" />
+计算图是用来描述运算的有向无环图；
 
-Pytorch的计算图由节点和边组成，节点表示张量或者Function，边表示张量和Function之间的依赖关系。
+计算图有两个主要元素：结点（Node）和边（Edge）；
+
+结点表示数据，如向量、矩阵、张量，边表示运算，如加减乘除卷积等；
+
+用计算图表示：$$y = ( x + w ) ∗ ( w + 1 )$$
+令$$a=x+w , b=w+1, y=a∗b$$，那么得到的计算图如下所示：
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211216153652682.png" alt="image-20211216153652682" style="zoom:43%;" />
+
+数学求导：
+
+$$ y=(x+w)∗(w+1)$$
+$$a = x + w; b = w + 1$$
+$$y = a ∗ b$$
+
+$$\frac{\partial y}{\partial w} = \frac{\partial y}{\partial a} \frac{\partial a}{\partial w} + \frac{\partial y}{\partial b} \frac{\partial b}{\partial w}$$
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211216154411949.png" alt="image-20211216154411949" style="zoom:44%;" />
+
+通过分析可以知道，y对w求导就是在计算图中找到所有y到w的路径，把路径上的导数进行求和。
+
+
+
+其中，叶子节点是x和w，叶子节点是整个计算图的根基。
 
 什么是叶子节点张量呢？叶子节点张量需要满足两个条件。
 
 1，叶子节点张量是由用户直接创建的张量，而非由某个Function通过计算得到的张量。
 
 2，叶子节点张量的 requires_grad属性必须为True.
+
+例如前面求导的计算图，在前向传导中的a、b和y都要依据创建的叶子节点x和w进行计算的。同样，在反向传播过程中，所有梯度的计算都要依赖叶子节点。设置叶子节点主要是为了节省内存，在梯度反向传播结束之后，非叶子节点的梯度都会被释放掉。
+
 
 所有依赖于叶子节点张量的张量, 其requires_grad 属性必定是True的，但其梯度值只在计算过程中被用到，不会最终存储到grad属性中。如果需要保留中间计算结果的梯度到grad属性中，可以使用 retain_grad方法。
 
@@ -171,6 +208,8 @@ print(loss.is_leaf)
 ```
 
 
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211216011059363.png" alt="image-20211216011059363" style="zoom:40%;" />
 
 Pytorch中的计算图是动态图。这里的动态主要有两重含义。
 
@@ -559,6 +598,35 @@ print(model.conv1.weight.grad[0][0][0])
 
 ###  tensor.detach()
 
+当我们训练网络的时候可能希望保持一部分的网络参数不变，只对其中一部分的参数进行调整；或者只训练部分分支网络，并不让其梯度对主网络的梯度造成影响，这时候我们就需要使用detach()函数来切断一些分支的反向传播。
+
+假设有模型A和模型B，我们需要将A的输出作为B的输入，但训练时我们只训练模型B. 那么可以这样做：
+
+```input_B = output_A.detach()```
+
+**它可以使两个计算图的梯度传递断开**，从而实现我们所需的功能。
+
+返回一个新的tensor，新的tensor和原来的tensor**共享数据内存**，**但不涉及梯度计算**，即requires_grad=False。修改其中一个tensor的值，另一个也会改变，因为是共享同一块内存,但如果对其中一个tensor执行某些内置操作，则会报错，例如resize_、resize_as_、set_、transpose_。
+
+```python
+>>> import torch
+>>> a = torch.rand((3, 4), requires_grad=True)
+>>> b = a.detach()
+>>> id(a), id(b)  # a和b不是同一个对象了
+(140191157657504, 140191161442944)
+>>> a.data_ptr(), b.data_ptr()  # 但指向同一块内存地址
+(94724518609856, 94724518609856)
+>>> a.requires_grad, b.requires_grad  # b的requires_grad为False
+(True, False)
+>>> b[0][0] = 1
+>>> a[0][0]  # 修改b的值，a的值也会改变
+tensor(1., grad_fn=<SelectBackward>)
+>>> b.resize_((4, 3))  # 报错
+RuntimeError: set_sizes_contiguous is not allowed on a Tensor created from .data or .detach().
+```
+
+#### tensor.detach()与tensor.data()
+
 在 0.4.0 版本以前，`.data` 是用来取 `Variable` 中的 `tensor` 的，但是之后 `Variable` 被取消，`.data` 却留了下来。现在我们调用 `tensor.data`，可以得到 tensor的数据 + `requires_grad=False` 的版本，而且二者共享储存空间，也就是如果修改其中一个，另一个也会变。因为 PyTorch 的自动求导系统不会追踪 `tensor.data` 的变化，所以使用它的话可能会导致求导结果出错。官方建议使用 `tensor.detach()` 来替代它，二者作用相似，但是 detach 会被自动求导系统追踪，使用起来很安全。多说无益，我们来看个例子吧：
 
 ```python
@@ -578,6 +646,57 @@ print(b)
 loss.backward()
 # RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation
 ```
+
+这个例子中，`b` 是用来计算 loss 的一个变量，我们在计算完 loss 之后，进行反向传播之前，修改 `b` 的值。这么做会导致相关的导数的计算结果错误，因为我们在计算导数的过程中还会用到 `b` 的值，但是它已经变了（和正向传播过程中的值不一样了）。在这种情况下，PyTorch 选择报错来提醒我们。但是，如果我们使用 `tensor.data` 的时候，结果是这样的：
+
+```python
+a = torch.tensor([7., 0, 0], requires_grad=True)
+b = a + 2
+print(b)
+# tensor([9., 2., 2.], grad_fn=<AddBackward0>)
+
+loss = torch.mean(b * b)
+
+b_ = b.data
+b_.zero_()
+print(b)
+# tensor([0., 0., 0.], grad_fn=<AddBackward0>)
+
+loss.backward()
+
+print(a.grad)
+# tensor([0., 0., 0.])
+
+# 其实正确的结果应该是：
+# tensor([6.0000, 1.3333, 1.3333])
+```
+
+这个导数计算的结果明显是错的，但没有任何提醒，之后再 Debug 会非常痛苦。所以，建议大家都用 `tensor.detach()` 啊。
+
+
+
+## tensor.item()和tensor.tolist()
+
+我们在提取 loss 的纯数值的时候，常常会用到 `loss.item()`，其返回值是一个 Python 数值 (python number)。不像从 tensor 转到 numpy (需要考虑 tensor 是在 cpu，还是 gpu，需不需要求导)，无论什么情况，都直接使用 `item()` 就完事了。如果需要从 gpu 转到 cpu 的话，PyTorch 会自动帮你处理。
+
+但注意 `item()` 只适用于 tensor 只包含一个元素的时候。因为大多数情况下我们的 loss 就只有一个元素，所以就经常会用到 `loss.item()`。如果想把含多个元素的 tensor 转换成 Python list 的话，要使用 `[tensor.tolist](<https://www.zhihu.com/search?q=tensor.tolist&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType":"article","sourceId":67184419}>)()`。
+
+```python
+x  = torch.randn(1, requires_grad=True, device='cuda')
+print(x)
+# tensor([-0.4717], device='cuda:0', requires_grad=True)
+
+y = x.item()
+print(y, type(y))
+# -0.4717346727848053 <class 'float'>
+
+x = torch.randn([2, 2])
+y = x.tolist()
+print(y)
+# [[-1.3069953918457031, -0.2710231840610504], [-1.26217520236969, 0.5559719800949097]]
+```
+
+
 
 
 
@@ -678,14 +797,6 @@ for i in range(500):
 
 print("y=",f(x).data,";","x=",x.data)
 ```
-
-
-
-## detach()函数的作用
-
-当我们训练网络的时候可能希望保持一部分的网络参数不变，只对其中一部分的参数进行调整；或者只训练部分分支网络，并不让其梯度对主网络的梯度造成影响，这时候我们就需要使用detach()函数来切断一些分支的反向传播。
-
-Detach()返回一个新的Variable，从当前计算图中分离下来的，但是仍指向原变量的存放位置,不同之处只是requires_grad为false，得到的这个Variable永远不需要计算其梯度，不具有grad。即使之后重新将它的requires_grad置为true,它也不会具有梯度grad, 这样我们就会继续使用这个新的Variable进行计算，后面当我们进行反向传播时，到该调用detach()的Variable就会停止，不能再继续向前进行传播。
 
 ## view函数的作用
 
