@@ -93,7 +93,7 @@ subsumption architecture - the most famous reactive agent architecture
 
 
 
-## Week2: Practical Reasoning Agents
+# Week4: Practical Reasoning Agents
 
 ## 2.1 Delibration and Means-ends reasoning
 
@@ -183,3 +183,307 @@ E.g：
 
 agents慎思之后就会改变intention，因为deliberation是两部分组成（ **weighing up** the options available to me and **deciding** which ones to commit to as intentions）。当且仅当Agent选择镇思的时候，使Agent 改变意图，两数reconsider (…)的行为是最优的。对于
 Agent 选择了慎思过程，但没有改交意图时，则在慎思过程中花费的努力就是浪费。同样，如果 Agent应该改变意图，但是没有能改变失败了，则花费在实现意图上的努力也是浪费的。因此1和4最优
+
+
+
+
+
+# Week5: communication, coordination and cooperation
+
+## 5.1 Communication
+
+Communication acts:
+
+- The **locutionary act**: this is the act of making the utterance.
+- The **llocutionary act**: the conveying of the speaker's intentions to the hearer.
+- The **perlocution**: the effect achieved by the speech act.
+
+For example, if I utter the speech act "Please make me some tea":
+
+- The locutionary act is me saying "Please make me some tea".
+- The illocutionary act is that I have requested you to make me some tea.
+- The perlocution depends on how you respond to my request. I hope that you will make me some tea, but you might not.
+
+### 5.1.1 KQML
+
+Autonomous heterogeneous agents in a multi-agent system require a shared **agent communication language** (ACL) so they can communicate with one another. KQML属于ACL的一种
+
+
+
+### 5.1.2 FIPA
+
+在FIPA ACL中，把发送agent必须要满足的条件叫可行性前提（Feasibility Precondition），把Agent希望通过执行通信行动后所取得的效果称为理性效果（Rational Effect）
+
+the intended effect of each performative is defined (the rational effect): the receiver of a message understands that this is what the sender wishes to achieve. 
+
+FIPA ACL. 语义还规定了发送方认为应当是真的条件.考虑一个通信行动$(i,inform (j, \alpha)〉$，在这里，Inform 的内容是命题$\alpha$，它的含义是 Agent i通知 Agent j 命题$\alpha$为真。 根据 FIPA ACL. 的语义,inform 的Feasibility Precondition 就是Agent i认为命题$\alpha$为真,并且相信 Agentj没有关于$\alpha$的任何知识。Inform 的Rational Effect就是 Agent i 想让 Agent j相信命题$\alpha$为真.
+
+E.g:
+
+If we see an agent send a FIPA request message then we can be sure that the feasibility precondition is true? FALSE!!!
+
+解释：The feasibility precondition is given in terms of the sender's mental state (i.e., the sender must believe that the receiver can perform the action, and they must not believe that the receiver already intends to perform the action). Agents are autonomous, independent entities and we cannot (in general) access their private mental state. This means that we can't be sure, when an agent sends a request message, that the relevant feasibility precondition holds. For example, if the sender is a malicious agent, it may in fact believe that the receiver cannot perform the action, but nevertheless makes the request as a way of disrupting the receiver (by taking up its attention with the message). What this means in general is that we cannot be sure that agents are conforming to the semantics of the FIPA ACL.
+
+### 5.1.3 Social commitments
+
+By giving a clear semantics for an ACL, we aim to make the agents' reasoning process easier. If an agent ag1 is conforming to the semantics of the FIPA ACL, then this means that an agent ag2 receiving a message from 𝑎𝑔1ag1 can know something about ag1's mental state. But we have just seen that we cannot be sure if an agent is conforming to the FIPA ACL semantics, exactly because they are defined in terms of the agent's mental state. This is a challenge for ACLs that is not yet resolved. One approach to address this is to define ACL semantics based on **social commitments.**
+
+
+
+## 5.2 Cooperation
+
+**Cooperative Distributed Problem Solving** (CDPS)
+
+
+
+Cooperative Distributed Problem Solving involves these steps:
+
+- Problem decomposition: dividing the problem into smaller tasks for distribution among agents.
+-  Subproblem allocation: determining which subproblems to allocate to which agents.
+- Subproblem solution: where the agents solve the individual subproblems that they have been allocated.
+- Subproblem synthesis: where solutions to individual subproblems are integrated into an overall solution.
+
+### 5.2.1 Contract Net protocol
+
+which addresses the second stage of Cooperative Distributed Problem Solving (CDPS): sub-problem allocation. 
+
+在合同网协议中，所有Agent 可以归纳为两种角色：管理者和承包商。其中，管理者的职责包括：对每一个待求解任务建立
+任务通知书，将任务通知书发送给有关的承包商 Agent ；接收并评估来自承包商的投标；从投标中选择最合适的承包商，与之建立
+合同；监督任务的完成，并综合结果。承包商的职责包括：接收相关任务通知书：根据自己的能力判断是否接受任务，不接受发送拒标通知，否则发送投标通知：如果投标被接受，按合同执行分配给自己的任务，向管理者发送求解结果。
+
+在合同网协作方法中，不需要预先规定 Agent 的角色，任何Agent通过发布任务通知而成为管理者；任何 Agent通过应答任务通知而成为承包商。系统中的每一待求解任务，由承担该任务的Agent 负责完成。当该 Agent 无法独立完成该任务时，它就将履行管理者职责，为该任务发送任务通知书：然后从返回的投标中选择‘最合适”的 Agent，将任务分配给此Agent，建立相应的合同。
+
+
+
+## 5.3 Coordinate
+
+在合作中，要讨论的主要问题就是协调问题。协调问题是指如何管理 Agent动作之间的内部依赖关系。如果 Agent 参加的动作中存在以任何方式的相互作用，那么一定的协调机制是必需的。两个动作之间是如何进行相互作用的？可以考感下面现实世界中的例子：
+
+- 你和我都打算商开房间，并且我们各自向门走去，而门只允许我们一个人过去。我有礼貌地允许你先离开。
+  在这个例子中，我们的活动需要协调，因为这里只有一个资源（门），而我们都需要使用该资源，但是在同一时间只允许一个人使用。
+- 我打算提交一份助学金申请书，但是为了做这件事，需要你的签字。在这种情况下，我提交助学金申请书的动作依赖于你签字的动作
+  --除非你的动作完成，我不能完成我的动作。换句话说，我的动作依赖于你的动作。
+- 我从网络上得到一份文件的软持贝。我知道你也对这份报告感火趣，这样我主动复印
+  一份报告，并给你一份拷贝。在这种情况下，我们的动作不需要严格的协调-—因为这份报告在网上可以免费获得，你也可能下载并打印。但是通过我主动的打印，节约了你的时间，进而直觉上提高了你的效用。
+
+广义上动作之间的依赖关系分为消极和积极
+
+
+
+**Negative relationships**
+
+- **Resource induced**. This is where there are insufficient resources to allow both actions to occur simultaneously. For example, if we're both trying to walk through the same door, or if two agents both need access to the same printer.
+
+- **Incompatibility**. This is where the actions require mutually exclusive states. For example, you may need to sit an exam, which requires that your phone is switched off. And your partner may be booking you both a holiday, which requires your phone to be switched on so that they can contact you to confirm the dates.
+
+**Positive relationships**
+
+- **Requested**. This is where an agent explicitly asks for help with an action. For example, via the Contract Net Protocol.
+
+- **Action equality**. This is where the agents recognise that they are both planning to perform the same action, and so one can perform it and save the other agent the work. For example, two students may realise that they are both planning to post the same question to the KEATS forum, and so agree that only one of them will do this. 我们都打算执行一个动作，并且相互知道，这样的话我们中的一个能独立去完成任务，从而节省另一个人的努力
+
+- **Consequence**. This is where an action that one agent is planning has a side effect of achieving one of another agent's goals. For example, if I plan to drive the car I share with my partner tomorrow, I may need to first fill it up with petrol. My partner may have the goal that the car has some petrol in it, and so I am achieving their goal as a side effect of my action to drive the car. 我计划中的动作的执行可以导致你的某个目标的完成，这是我动作的副作用，这样就解除了你去完成该目标的需要
+
+- **Favour**. This is similar to the consequence relationship. The action that one agent is planning has a side effect of contributing to another agent's goals, for example by achieving some precondition for an action in the other agent's plan. My flatmate may have a goal to cook a nice dinner, and the plan for this requires that milk is available. If I'm planning to do the weekly shopping, which involves buying milk, this helps my flatmate to achieve their goal. 我计划中的部分有这样的副作用，其执行会对你目标的实现产生贡献，也许是使目标的实现变得更容易（例如，通过实现你动作的一个前提条件）
+
+我们设计的系统希望利用积极作用，消除消极作用
+
+One approach agents can use to coordinate their activities is **multi-agent planning**.
+
+- **Centralised planning for distributed agents**
+
+  In this approach, there is a coordinating agent who has all the information about each individual agent's private goals and available actions. The coordinating agent uses this information to find an effective global plan for all of the agents.
+
+  
+
+- **Partial global planning**
+
+  Here, the agents plan for themselves but by sharing this information they also build up a (partial) view of the global plan of all agents, which they can use to improve their own plans. They then share their revised partial view of the global plan with the other agents, allowing them to improve their own plans, who then share their revised partial view of the global plan, and so on. 
+
+- **Centralised merging of individual plans**
+
+  In this approach, the agents first plan for themselves (according to the information they have about their own goals and actions) and then share their local plans with a coordinating agent. This coordinating agent then must merge these plans to create an efficient global plan for all the agents. 
+
+### 5.3.1 Normative multi-agent systems
+
+ In the multi-agent planning approach, we saw how this can be achieved by the agents sharing information about their actions and goals (either directly with each other, or with a centralised coordinating agent), but often agents may not want to share this private information with other agents in the system.
+
+An agent can also have expectations about the behaviour of other agents because of knowledge it has about the system they are working in. An agent can expect certain behaviours because it is *normal* (i.e., a conventional way to act) or because it is *normative* (i.e., it is an expected standard set by the system). This is the area of **normative multi-agent systems**. 
+
+Norms can be **prescriptive** (that is, standards set by the system, so normative). Some examples:
+
+- In the UK, you must drive on the left (unless you are on a one way street or on private property).
+
+- At King's, you must not plagiarise, cheat or collude on assessments.
+
+Or norms can be **conventions** (that is, normal expected behaviours). Some examples:
+
+- If it's your friend's birthday, you should buy them a present.
+
+- People in the UK typically have dinner around 7pm.
+
+- If you use an escalator in the UK, you should either stand on the right or walk up it on the left.
+
+#### 5.3.1.1 Prescriptive Norms
+
+*< target, deontic-component, context, content, punishment >*
+
+where
+
+*target* defines the agents to whom the norm applies;
+
+*deontic-component* denotes the type of norm, either obligation, prohibition or permission;
+
+*context* defines when the norm applies;
+
+*content* is the behaviour that is constrained by the norm;
+
+*punishment* is what happens if an agent gets caught violating the norm. 
+
+- An **obligation** norm says that "in the given *context*, an agent of the *target* type is obliged to perform (i.e., they must perform) the *content* behaviour, and if they get caught not doing so they will receive the *punishment*."
+
+​		For example the norm 
+
+​		*< all-drivers, obligation, at-red-light, stop, 3-points-on-licence >*
+
+​		says that all drivers must stop when they're at a red light, and if they're caught not doing so they will get 3 points on their 		licence. 
+
+- A **prohibition** norm says that "in the given *context*, an agent of the *target* type is prohibited from performing (i.e., they must not perform) the *content* behaviour, and if they get caught doing so they will receive the *punishment*." 
+
+​		For example the norm 
+
+​		*< all-drivers, prohibited, on-public-UK-road, drive-on-right, 6-points-on-licence >*
+
+​		says that all drivers must not drive on the right when they're on a public road in the UK, and if they're caught doing so they 		will get 6 points on their licence. 
+
+- **Permission** norms are slightly different. These do not say that a *target* agent must or must not do something, but rather that it is permitted to do the *content* behaviour in the given *context*. Permission norms are typically used to identify exceptions to prohibitions and obligations, and as such do not normally have a *punishment* associated with them. 
+
+​		For example the norm 
+
+​		*< all-drivers, permitted, on-one-way-UK-street, drive-on-right, __ >*
+
+​		says that all drivers are permitted to drive on the right if they are on a one way street in the UK.
+
+​		Another example, the norm
+
+​		*< ambulance-drivers, permitted, at-red-light AND on-way-to-emergency, go, __ >*
+
+​		says that ambulance drivers are permitted to drive through red lights as long as they are on their way to an emergency.
+
+
+
+An agent's reasoning about what to do is affected by its knowledge of the norms in the system:
+
+An agent knows that if it is caught violating a prescriptive norm, this will lead to a punishment (i.e., some decrease in its utility).
+
+If an agent violates a convention this will not cause direct punishment, but it may indirectly cause some decrease in utility by hindering the agent's coordination with other agents in the system.
+
+So an agent can choose to violate a norm, but in doing so it should weigh up any potential negative consequences of this.
+
+Consider the following prescriptive norm:
+
+< *all-drivers,* *prohibited, on-UK-highway, drive-over-70-mph, fine-£50 >*
+
+This says that all drivers on UK highways are prohibited from driving over 70 miles per hour, and if they get caught violating this norm they will get a £50 fine.
+
+
+
+Let's look together now at some different reasons a driver on a UK highway might have for disobeying this norm:
+
+< *all-drivers,* *prohibited, on-UK-highway, drive-over-70-mph, fine-£50 >*
+
+**Ignorance**: the agent may not be aware of the norm. For example, if the driver doesn't normally drive in the UK and they haven't seen any of the road signs.
+
+**Lack of understanding**: the agent may not understand what the norm means. For example, if the driver does not know what counts as a UK highway.
+
+**Punishment is too low**: if the punishment is too low, then the agent has little incentive to obey the norm (there will be little impact on their utility if they get caught). For example, if the driver is a millionaire they may not care whether they get a £50 fine or not.
+
+**Probability of getting caught is too low**: the agent may be willing to risk the punishment if they believe there is little chance that they will get caught. For example, if the driver believes they can out run any police.
+
+**Another goal may be more important**: if obeying the norm will mean that the agent cannot achieve an important goal, the loss in utility from not achieving this goal may be greater than any punishment from disobeying the norm. For example, if the driver's partner is about to give birth and the driver is racing to get to the hospital to meet them, it may be so important to the driver that they are with their partner for the birth that they are willing to take the penalty if they get caught disobeying the norm.
+
+**There may be no choice**: an agent may not have the capability to comply with the norm. For example, if the driver's accelerator pedal gets stuck!
+
+These reasons hint at some of the challenges involved in designing appropriate prescriptive norms to govern a system:
+
+**Agents need to know the norms.** There must be an efficient way of communicating the norms to all the agents in the system. This becomes more complicated if the system is open (meaning that that agents can freely choose whether to join or leave the system at any time), as it becomes harder to ensure that the agents that are currently part of the system are all aware of the norms.
+
+**Agents need to understand the norms.** Think back to the discussions earlier on in this topic about agent communication, and how the agents need a shared understanding of the meaning of the terms that they exchange. The agents need a shared understanding of the norms in the system and of the terms that are used to define them.
+
+**Monitoring of agents' adherence to the norms needs to be effective.** There is a balance to be struck here between the amount of effort involved in monitoring the agents' behaviours, and the likelihood that any agents disobeying a norm will be caught.
+
+**Punishments need to be suitable.** Punishments need to be sufficient that they will dis-incentivise agents from disobeying the norms, but shouldn't be so great that they completely curtail the agents' autonomy. If the agents (or the agent designers) view the punishments as unreasonably severe, they may decide that the system does not allow them sufficient individual choice to disobey norms when they feel it is appropriate to do so.
+
+The other key challenge is **how to design a suitable set of prescriptive norms that will encourage the types of behaviour that are desired from the system.** This is similar to the challenges faced by the designer of a reactive agent, where it can be very hard to come up with an appropriate set of individual behaviours that, when working together in a subsumption architecture, will produce the desired behaviour. It can be very hard to understand how all the different possible interactions between the norms and the different agents in the system will impact on the overall behaviour of the system.
+
+While prescriptive norms are designed for a system, conventions *emerge* from the behaviours of the agents in the system. Typically, conventions emerge over time due to agents copying each others' behaviours. For example, imagine you visit a country you've not been to before, and when you go on an escalator for the first time you notice that everyone seems to be either standing on the left or walking on the right. You are likely to adopt the same behaviour, and so will be better coordinated with the other people using the escalator. 
+
+That finishes our discussion of different mechanisms agents can use to help coordinate their behaviour. The last thing we will cover in this topic is trust and reputation.
+
+### 5.4 Trust and reputation
+
+该信任哪个agent呢
+
+There are two main ways an agent can determine how reliable it believes another agent to be: based on its own experience (trust) and based on the experience of others (reputation).
+
+**Trust**. An agent can determine its measure of trust in another agent according to its past experience with that agent. if I've used two different delivery companies in the past, one of which consistently delivered later than promised and the other of which was always on time, I will trust the company which is always on time more than I trust the one that is always late.
+
+**Reputation**. This is derived from the experience of other agents. Did the agent do a good job for others in the past? For example, if a company receives consistently negative reviews we would view that company as having a poor reputation. Or if agent Ag1 tells Ag3 about their bad experiences with Ag2, this may affect Ag3's view of Ag2's reputation. 
+
+### 5.4.1 FIRE Model
+
+how an agent can calculate its trust of another agent？
+
+The **FIRE model** is a model of trust and reputation that agents can use to help them decide who they might delegate tasks to
+
+
+
+FIRE uses four different sources of information to judge another agent's reliability. Let us refer to the agent who is judging another agent's reliability as the *evaluator*, and the agent whose reliability is being judged as the *target* agent. The four sources of information that the evaluator can use are:
+
+**Direct experience.** The evaluator can use the knowledge it has of its previous interactions with the target agent. Trust derived from direct experience is called **Interaction Trust**.
+
+**Witness information.** The evaluator can use information about other agents' experiences of interacting with the target agent (these other agents are the *witnesses*). Trust derived from witness information is called **Witness Reputation**.
+
+**Role-based rules.** This is where the evaluator can have certain expectations about the target agent because of some role that the target holds. For example, if the evaluator and the target agent are both part of the same organisation, the evaluator may be inclined to trust the target agent. Trust derived from role-based rules is called **Role-based Trust**.
+
+**Third-party references provided by the target agent.** This is similar to witness information, except the target agent itself collects the references and can provide these to the evaluator. Trust derived from third-party references is called **Certified Reputation**.
+
+
+
+
+
+E.g:
+
+An agent, Ag0, determines who to delegate a task to using a simplified FIRE trust model, in which it uses only interaction trust to compare agents, only considers a single quality-of-service term, and uses a recency function such that a rating of an interaction on one day is given twice the weight of an interaction from the day before. Agents Ag1, Ag2 and Ag3 offer to perform the task.
+
+- 10 days ago, Ag0 delegated to Ag1 with rating 0.5 and to agent Ag3 with rating 0.8.
+- 8 days ago, Ag0 delegated to Ag1 with rating 0.9 and delegated to Ag2 with rating 0.6.
+- 7 days ago, Ag0 delegated to Ag2 with rating 0.3.
+
+Which of the following statements are true?
+
+解析：
+
+**Ag0's trust in Ag1**
+
+Ag0 has had two prior interactions with Ag1: 10 days ago with a rating of 0.5; and 8 days ago with a rating of 0.9. We need to find the weighted average of these two ratings, where the weights applied to the ratings are such that the rating of an interaction on one day is given twice the weight of an interaction from the day before. Since the interaction rated 0.5 came two days before the interaction rated 0.9, we need to weight the 0.9 rating at 4 times the 0.5 rating. (If the rating of an interaction on one day is given twice the weight of an interaction from the day before, then the rating of an interaction must be given four times the weight of an interaction from two days ago.) Ag0's trust in Ag1 is calculated as the weighted average of the ratings (i.e., the sum of the weighted ratings divided by the sum of the weights): 
+
+((1 x 0.5) + (4 x 0.9))/(1+4) = 4.1/5 = 0.82   （最近一天是前一天权重的两倍）
+
+**Ag0's trust in Ag2:**
+
+Ag0 has had two prior interactions with Ag2: 8 days ago with a rating of 0.6; and 7 days ago with a rating of 0.3. We need to find the weighted average of these two ratings, where the weights applied to the ratings are such that the rating of an interaction on one day is given twice the weight of an interaction from the day before. Since the interaction rated 0.6 came one day before the interaction rated 0.3, we need to weight the 0.3 rating at 2 times the 0.6 rating. Ag0's trust in Ag2 is calculated as the weighted average of the ratings (i.e., the sum of the weighted ratings divided by the sum of the weights): 
+
+((1 x 0.6) + (2 x 0.3))/(1+2) = 1.2/3 = 0.4
+
+**Ag0's trust in Ag3:**
+
+Ag0 has only had one prior interaction with Ag3: 10 days ago with a rating of 0.8. As there is only one interaction to consider, the weighted average of its rating is straightforward, it's simply equal to the rating. So Ag0's trust in Ag3 is 0.8.
+
+Since Ag0 trusts Ag1 more than it does either Ag2 or Ag3, it selects Ag1 to delegate the task to.
+
+
+
+
+
+# Wee6: Game theory, and negotiation
