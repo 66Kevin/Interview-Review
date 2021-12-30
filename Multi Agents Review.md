@@ -487,3 +487,143 @@ Since Ag0 trusts Ag1 more than it does either Ag2 or Ag3, it selects Ag1 to dele
 
 
 # Wee6: Game theory, and negotiation
+
+## 6.1 Game Theory
+
+### 6.1.1 Dominant strategy 
+
+优势策略：a strategy $s_i$ is dominant for agent $𝑖$ if, no matter what the other agents do, agent 𝑖 can't do any better than play $s_i$.
+
+A **rational** agent will play a dominant strategy(if one exists).
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211229210859331.png" alt="image-20211229210859331" style="zoom:30%;" />
+
+Is there a dominant strategy for player 1?? **Steal**
+
+如果P2选择Split，那对于P1而言最好的选择就是Steal，因为能获得10k；如果P2选择了Steal，对于P1而言选Split和Steal都一样，因为都只能获得0；综上所述，dominant strategy for P1 is **Steal**
+
+E.g: 
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211229211224774.png" alt="image-20211229211224774" style="zoom:40%;" />
+
+### 6.1.2 Dominanted strategy
+
+劣势策略，我们希望删除劣势策略
+
+A rational agent will never play a dominated strategy
+
+### 6.1.3 Nash Equilibrium
+
+双方都不能改变策略从中获益(better off)
+
+P1和P2都选择Steal，是Nash Equilibrium。因为假设P2不改变选择，P1选择了Split，依然还是获益0；假设P1不改变选择，P2选择了Split，依然获益是0，因此是Nash Equilibrium。
+
+P1选择Split，P2选择Steal，是Nash Equilibrium。因为假设P2不改变选择，P1选择了Steal，依然还是获益0；假设P1不改变选择，P2选择了Split，获益减少到5K，没有从中获益，因此是Nash Equilibrium。
+
+### 6.1.4 Pareto Optimal
+
+如果**不存在**其他的协商结局使至少一个Agent 更好而没有使其他 Agent 更差，则称这个协商结局具有Pareto 效率。所以如果协商结局没有达到Pareto 效率则存在另一个协商结局使得至少有一个Agent 更满意，同时使其他所有的Agent 至少满意
+
+1. 达到如果再改变就会使一方受益，另一方受损的最优临界点
+2. 两者同时达到最好，没有比这个状态更好的
+
+P1 Steal，P2 Steal就不是Pareto Optimal，因为P2可以选择Split来拿到10K的收益，但同时P1的收益没受到损害
+
+
+
+### 6.1.5 Maximising social welfare
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211229220849344.png" alt="image-20211229220849344" style="zoom:50%;" />
+
+## 6.2 Negotiation
+
+#### 6.2.1 Task Oriented Domains (TOD)
+
+面向任务领域协商
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211229224124696.png" alt="image-20211229224124696" style="zoom:30%;" />
+
+在Initial encounter中，Agent1初始被分配的是shop, cook, washUp; Agent2初始被分配的是getVideo,tidy,buyWine
+
+其中Agent1被分配任务的cost是12，同理Agent2是10；
+
+在新分配的任务中，Agent1不再需要做shop而需要做tidy，新deal是cook, tidy,washUp;同理，Agent2的新deal是shop，getVideo,buyWine。
+
+所以Agent1的Utility是12-9=3；Agent2的是10-6=4；
+
+因此Agent1做新的deal可以节省3的cost，Agent2做新的deal可以节省4的cost；新deal比初试deal要更合适。
+
+```
+Utility = a  - b
+
+a = the cost of what was original allocated to the agents in the initial encounter
+b = the cost of agent has been allocated in the new deal
+
+一项交易的Utility代表Agent从该交易中获得收益的多少
+如果Utility是负数，则证明代理执行最初分配的任务比执行交易中分配的任务更好; 如果是正数，则证明执行新任务比较好
+```
+
+- conflict deal: If agreement is not reached then we say that the result is the **conflict deal**. It is assumed that the conflict deal is the worst outcome。**对于conflict deal的utility是负的**
+- **Individual rational**: A deal δ is said to be **individual rational** if neither agent prefers the conflict deal to δ.
+- **negotiation set**：由交易组成，这些交易(具有个体理性，并且(i)是pareto 最优的。第一个约束背后的直观含义是指,提出对某一 Agent来说比冲突交易更不好的交易是没有意义的(因为这样的话 Agent 宁愿冲突)。第二个条件背后的直观含义是, 提出一个建议时，如果还有另外的建议对某一 Agent 更好而没有其他Agent 受到损失，则这个建议是没有意义的.
+
+### 6.2.2 Monotonic Concession Protoco
+
+- 协商进行多轮
+- 在第一轮协商中，两个agent同时从negotiation set中提出一项交易
+- 如果两个Agent提出的交易分别是$\delta_1$和$\delta_2$,使得或者有$utility_1(\delta_2) >= utility_1(\delta_1)$，或者$utility_1(\delta_1) >= utility_1(\delta_2)$，则达成一致。**即如果有一个Agent发现另一个agent提出的交易至少与自己提出的一样好或者比自己提出的更好。**
+- 如果不能达成一致，则协商继续进行另一轮，同时提出建议。在第u+1轮，不允许Agent提出比第u论建议对其他Agent更差的建议
+- 如果在某一轮u>0，没有agent做出让步，则协商以conflict deal结束
+
+
+
+### 6.2.3 Zeuthen strategy
+
+决定了参与者在使用Monotonic Concession Protoco是应该如何工作
+
+- Agent的第一个建议应该是什么？ 应该是Agent的第一个建议应该是他最希望的交易
+- 在给定的一轮协议中，谁应该让步？
+- 如果一个Agent让步，他应该让步多少？
+
+
+
+在给定的一轮协议中，谁应该让步？
+
+度量 Agent对冲突风险的意愿。直观上，如果Agent 当前建议的效用与冲突交易的效用差别小，则它更愿意骨冲突的风险。相反，如果一个Agent 当前的建议与冲突交易的差别大，则冲突时，这个Agent会遭受更大的损失，因此它更不愿意胃冲突风险--更愿意让步。
+
+Let's assume that $δi$ is the deal currently proposed by $Agi$ and $𝛿𝑗$ is the deal currently proposed by $Agj$. Formally, $Agi's$ willingness to risk the conflict deal is equal to
+
+$risk = \frac{utility_i(\delta_i) - utility_i(\delta_j)}{utility_i(\delta_i)}$
+
+分子定义为i当前建议的效用与j的建议对于i的效用的差;分母定义为 Agent i当前建议的效用。在达成一致以前。risk 的值在0~1之同。risk 的值超大（越接近1），表示i由冲交遭受的损失越小，因此更愿意冒冲突风险。反之，risk的值小（越接近0），表示由冲突遣受的损失越大，因此更不愿意冒冲突风险。
+
+
+
+
+
+# Week7: Making Group Decision
+
+## 7.1 Plurality Voting Protocol
+
+**Only takes into account the top preference of each voter**
+
+E.g: 
+
+Ω={𝜔1,𝜔2,𝜔3}Ω={ω1,ω2,ω3}.
+
+40 agents have the preference 𝜔1≻𝜔2≻𝜔3ω1≻ω2≻ω3.
+
+30 agents have the preference 𝜔2≻𝜔3≻𝜔1ω2≻ω3≻ω1.
+
+30 agents have the preference 𝜔3≻𝜔2≻𝜔1ω3≻ω2≻ω1.
+
+Under the plurality protocol:
+
+- ω1 gets 40 points.
+- ω2 gets 30 points.
+- ω3 gets 30 points.
+
+
+
+## 7.2 Condorcet Winner
+
