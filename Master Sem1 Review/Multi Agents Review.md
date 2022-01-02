@@ -448,10 +448,6 @@ FIRE uses four different sources of information to judge another agent's reliabi
 
 **Third-party references provided by the target agent.** This is similar to witness information, except the target agent itself collects the references and can provide these to the evaluator. Trust derived from third-party references is called **Certified Reputation**.
 
-
-
-
-
 E.g:
 
 An agent, Ag0, determines who to delegate a task to using a simplified FIRE trust model, in which it uses only interaction trust to compare agents, only considers a single quality-of-service term, and uses a recency function such that a rating of an interaction on one day is given twice the weight of an interaction from the day before. Agents Ag1, Ag2 and Ag3 offer to perform the task.
@@ -519,6 +515,10 @@ A rational agent will never play a dominated strategy
 P1和P2都选择Steal，是Nash Equilibrium。因为假设P2不改变选择，P1选择了Split，依然还是获益0；假设P1不改变选择，P2选择了Split，依然获益是0，因此是Nash Equilibrium。
 
 P1选择Split，P2选择Steal，是Nash Equilibrium。因为假设P2不改变选择，P1选择了Steal，依然还是获益0；假设P1不改变选择，P2选择了Split，获益减少到5K，没有从中获益，因此是Nash Equilibrium。
+
+
+
+技巧：横着找出每一行第二个数字最大的，在底下划条线；竖着找出每一列第一个数字最大的，在底下画一条线，最后找出有两条线的组合就是纳什均衡。
 
 ### 6.1.4 Pareto Optimal
 
@@ -725,10 +725,311 @@ The candidate with the most points is the winner.
 
 
 
-- Dictatorships: 独裁是指整个社会的总体偏好排序会只由一个人的偏好排序决定，这个人有可能是隐藏在复杂的投票机制下的，不一定是班长那种显而易见的独裁者。If a voting protocol is a dictatorship then it ignores the preferences of all voters except for those of the dictator *i*.
+### 7.3 Strategy-proofness
 
-- Surjective: for every candidate there is some profile of voter preferences such that the candidate will win.
+防策略(Strategy-proofness)通常被认为是一个非常理想的属性,它要求投票者不能从谎报他们的真实偏好中获益,进而可以抑制社会选择中的策略投票,促使投票者都投出自己的真实选票,使选举结果能够体现人们的真实意愿.
+
+ A voting protocol is said to be strategy proof if and only if it is strategy proof for all voters. In other words no one has any incentive to misrepresent their preferences.
+
+- **Dictatorships**: 独裁是指整个社会的总体偏好排序会只由一个人的偏好排序决定，这个人有可能是隐藏在复杂的投票机制下的，不一定是班长那种显而易见的独裁者。If a voting protocol is a dictatorship then it ignores the preferences of all voters except for those of the dictator *i*. **不存在这样的选民，使得他的选择一定为最后结果。*存在某个选举人，只要他认为任意两个候选人的关系是 A>B ，那么即使其它选举人都认为 A<B ，选举结果也一定是 A>B** 。 
+
+- **Surjective**: for every candidate there is some profile of voter preferences such that the candidate will win.
 
   To put this another way, every candidate has a chance of winning. 
 
   This is a desirable property. Imagine we have a voting protocol that is not surjective, this would mean that there is some candidate which could not win -- even if every voter placed this candidate as their top choice.
+
+- **Resolute**: there is always a unique winner (i.e., no ties).
+
+  This is often a desirable property, since applications often require a unique winner.
+
+  Note, the voting protocols we have looked at here can easily be made resolute by adding the extra condition that in the case of a tie a winner will be selected at random.
+
+  
+
+## 7.4 Gibbard-Satterthwaite Theorem
+
+If we have 3 or more candidates, any **resolute** voting protocol that is **surjective** and **strategy proof** is a **dictatorship**.
+
+**It says that it is not possible to design a voting protocol that is resolute, surjective, strategy proof and not a dictatorship.**The voting protocols we have looked at are resolute (assuming ties are resolved randomly), surjective, and not dictatorships, therefore they cannot be strategy proof.
+
+
+
+## 7.5 Weekly Pareto
+
+A voting protocol is said to be weakly Pareto if and only if:
+
+- if there are candidates 𝜔𝑖 and 𝜔𝑗 such that **all** voters prefer 𝜔𝑖ωi to 𝜔𝑗, then 𝜔j will not be selected as the winner.
+
+In other words, if every voter prefers 𝜔𝑖 to 𝜔𝑗, the outcome will also reflect this. Hopefully it is clear that this is a desirable property.如果，选举中的每一个代理人比较A和B时都更喜欢A，那么B不可能是最终的选举结果
+
+ 设“欢喜”表示“（比原来）处境严格变好”，“忧愁”表示“（比原来）处境严格变差”。 资源配置变化后，“有人欢喜，无人忧愁”相对于“无人忧愁”是“更强的”帕累托改善，相对于“所有人欢喜”是“更弱的”帕累托改善。 若无论资源配置如何变化，都不可能“有人欢喜，无人忧愁”，则该状态是“强帕累托最优”。 若无论资源配置如何变化，都不可能“所有人欢喜”，则该状态是“弱帕累托最优”。
+
+## 7.6 Arrow's Theorem
+
+帕累托最优（Pareto）
+对于全部的N个排列顺序，如果A都在B之前，那么最后的结果A一定在B之前。
+
+无关因素独立性（Independence of Irrelevant Alternatives (IIA)）
+两个人的相关顺序不变的话，其他参与者的相对位置发生了变化，那么这两个人的相对位置也不会发生变化。 投票问题（voting theory）中，假如有四个候选人，即A、B、C和D，如果大多数民众（即超过一半）一致认为A优于C，那么B和D的相对位置发生了变化，也不会影响大多数民众的偏好上A优于C。
+
+非独裁（Nondictatorship）
+不存在这样的选民，使得他的选择一定为最后结果。
+
+**没有任何一种选举方式可以同时满足以上三个条件。对于具有两名以上候选人的选举，任何满足帕累托效率和IIA要求的社会福利职能都是独裁的——Arrow’s公理**  It says that it is not possible to design a voting protocol that is weakly Pareto, independent of irrelevant alternatives and not a dictatorship.
+
+We've now seen two impossibility results (Arrow's Theorem and the Gibbard-Satterthwaite Theorem) that tell us it is impossible to design democratic (non-dictatorship) voting protocols that have intuitively desirable properties.
+
+
+
+## 7.7 Single Peak Preferences and Median voter rule
+
+Gibbard-Satterthwaite定理和Arrow's Theorem都假设选民可以给予他们喜欢的候选人的任何偏好（即，他们可以以任何顺序列出它们）。如果我们限制允许选民提出的偏好命令，那么这些负面结果就不成立。
+
+**单峰偏好理论(Single Peak Preferences)**是限定每个选民的偏好只能有一个峰值。
+
+所谓单峰偏好，是指选民在一组按某种标准排列的备选方案中，有一个最为偏好的选择，而从这个方案向任何方面的偏离，选民的偏好程度或效用都是递减的。
+
+
+
+如果在一个多数决策的模型中，个人偏好都是单峰的，则反映中间投票人意愿的那种政策会最终获胜，因为选择该政策会使一个团体的福利损失最小。
+
+
+
+
+
+# Week8: Allocating Scarce Resources
+
+## 8.1 English Auction
+
+优势策略（dominate strategy）：Agent相继以略高于当前叫价的价格叫价，直到叫价到达他们当前的估价。bid the smallest amount possible above the current bid until the current bid price reaches your true valuation of the item being auctioned
+
+E.g:
+
+Consider an English auction with two bidders, 𝑎𝑔1ag1 and 𝑎𝑔2ag2, who are each playing their dominant strategy. 
+
+We have 
+
+- v1 = 7.5
+- v2 = 300
+
+where vi is agent agi's true valuation of the item. 
+
+The minimum bid increment allowed is 1, and the auctioneer starts the bidding at 5.
+
+How much will the auctioneer receive? (In other words, how much will the winning bidder end up paying for the item?) Assume that ag1 is always faster to bid than ag2 (that is, if both agents are willing to make a bid of b, ag1 will always be the agent who bids b).
+
+Answer: 8
+
+一旦到了7，Ag1就会停止拍卖，因为下一次拍价就是8了超过了Ag1的预期7.5；由于还没达到Ag2的期望，所以Ag2出价8，无人竞价，最终以8结束。
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211231001643159.png" alt="image-20211231001643159" style="zoom:40%;" />
+
+winner's valuation=300; 2nd highest valuation=7.5; 
+
+### 8.1.1 Shill bids
+
+虚假出价：A shill bid is a bid placed by the auctioneer, or by agents in collusion with the auctioneer, with the aim of increasing the price paid by the winner. 
+
+## 8.2 Dutch Auction
+
+递减拍卖
+
+### 8.2.1 Risk Averse
+
+不愿意长时间等待，减少风险，减少收益
+
+Risk Averse不愿意长时间的等待，因此很早就成交了，500w开始，490w就结束了，对于拍卖方来说，收益大。
+
+### 8.2.2 Risk Seeking
+
+愿意长时间等待时机，增大风险，增高收益
+
+Risk Seeking愿意长时间的等待，因此很晚才成交，500w开始，50w才结束，对于拍卖方而言，收益少。
+
+## 8.3 First Price Sealed Bid Auction
+
+拍卖只有一轮，卖给出价信封中最高的那位买家
+
+优势策略（dominate strategy）：低于真正价格叫价
+
+## 8.4 Vickrey Auction
+
+拍卖只有一轮，卖给出价信封中最高的那位买家，但只需要用第二高的价格购买即可
+
+优势策略（dominate strategy）：**出真实的估价来叫价**
+
+如果出高于估价的价格来叫价，有可能会拍到，但是会付出更多的价格购买，即使买到也会损失
+
+如果出低于估价的价格来叫价，即便拍卖到了藏品，也要付出第二高的价格来购买，出低价没有得到相应的回报
+
+注意，Vickrey 拍卖会使反社会行为成为可能。假设你希望得到某物品并且自己估价为90美元，但是，你知道有其他 Agent也想得到它并且估价为 100 美元。因为给出真正有效的优势策略，你不可能有比90美元更好的出价；你的对手出价100 美元并且得到了这个物品，但是只要支付90 美元。对这样的结果你可能不会高兴：你可能想要“惩行”一下获胜的对手，应该怎么做呢？假设你出价99 美元而不是90 美元，你仍然会把这个物品输给你的对手-但是他要比你以完全真正的叫价多支付，美元。当然，要做到这一点，你必须对对手的如何叫价非常自信-你不想出价99 美元而发现你的对手只出价95 美元，你要以比你的估价高5美元留下这个物品。这种行为会在商业环境下出现，其中一个公司没有办法与另一个公司直接竞争，但是可以利用它们的见解来迫使对手破产
+
+
+
+## 8.5 Combinatorial Auctions
+
+组合拍卖
+
+如果有多个资源，并且多个资源之间可能存在依赖关系，那么对于青睐这些资源的用户而言，购买多个相互关联的资源的性价比可能要优于单独的购买一个资源，对于平台而言的话，也可能会利益最大化。那么，如何分配这一系列相互关联的资源就是一个问题了，**组合拍卖**就诞生了！
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211231014721802.png" alt="image-20211231014721802" style="zoom:40%;" />
+
+The allocation ({z2,z3},{z1}) gives the highest social welfare of:
+
+𝑣1({𝑧2,𝑧3})+𝑣2({𝑧1})=6+5=11
+
+## 8.6 Vickrey-Clarke-Groves mechanism(VCG)
+
+- each agent submits a valuation function to the auctioneer (step 1 below), 
+- the auctioneer works out the allocation that will maximise the social welfare (step 2 below) and makes this allocation (step 3 below),
+- the amount each agent must pay is calculated as in step 4 below.
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211231015443539.png" alt="image-20211231015443539" style="zoom:40%;" />
+
+$P_i$解释：Agi参加前- Agi参加后的social warfare
+
+Social welfare without i: 如果i直接不参与竞拍，即只有其他代理参与的情况下，拍卖者根据social welfare最大化给出的最优分配，算得没有i的情况下的和
+
+Toal value to other agents：所有代理参与到竞拍中，拍卖者根据social welfare最大化给出的最优分配。**分配后将i的报价忽略（设为0）之后计算的价值和**
+
+
+
+E.g:
+
+Suppose we have two goods a and b and two agents 𝑎𝑔1ag1 and 𝑎𝑔2ag2 who can each obtain at most one item. The agents declare the following true valuation functions:
+
+𝑣̂ 1({𝑎})=𝑣1({𝑎})=4
+
+𝑣̂ 1({𝑏})=𝑣1({𝑏})=5
+
+𝑣̂ 2({𝑎})=𝑣2({𝑎})=7
+
+𝑣̂ 2({𝑏})=𝑣2({𝑏})=9
+
+- Which allocation of goods is made?
+
+   最大化social welfare原则来讲，方案({a},{b}) 最佳，a卖给ag1，b卖给ag2
+
+- How much does each agent pay to the mechanism?
+
+​		假设Ag1没参与，则应分配({},{b})来满足最大化sw; 假设Ag2没参与，则应分配({b},{})来满足最大化sw
+
+​		Ag1 should pay = Ag1不参与竞拍的最大sw之和 - 都参与竞拍并忽略Ag1的最大sw之和 = ({},{b}) - ({a},{b})忽略{a} = 9 - 9 =0；
+
+​		Ag2 should pay = Ag2不参与竞拍的最大sw之和 - 都参与竞拍并忽略Ag2的最大sw之和 = ({b},{}) - ({a},{b})忽略{b} = 5 - 4 =1;
+
+- What utility does each agent get?
+
+  Ag1 utility = 最佳方案({a},{b}) 中Ag1应付的 - Ag1 应付的 = 4 - 0 = 0；
+
+  Ag2 utility = 最佳方案({a},{b}) 中Ag2应付的 - Ag2 应付的 = 9 - 1 = 8；
+
+- Can agent ag1 improve its utility by lying and declaring valuation 𝑣̂ 1≠𝑣1? Hint: think about the possible cases.
+
+​		Case 1: ({a},{b})计算utility = 4
+
+​		Case 2: ({b},{a})计算utility = 3
+
+​		所以不可能
+
+
+
+Like with the Vickrey auctions, the **dominant strategy** for the VCG mechanism is to submit your true valuation at step 1. This is a desirable property, since it means that the bidders do not need to expend any effort in reasoning about what valuation to submit, they can do no better than to submit their true valuation.
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211231030617352.png" alt="image-20211231030617352" style="zoom:50%;" />
+
+a和b只能分配给一个人，{a}{b}
+
+
+
+# Week9: Reasoning with Arguments
+
+An argument has a claim and a support. (Sometimes we refer to the claim as the argument's conclusion, and sometimes we refer to the support as the argument's premises.) The support of an argument provides reasons to believe in the claim. 
+
+- Claim：结论
+- Support: 前提
+-  Support is equal to the claim called **atomic arguments**, 比如⟨{𝑎},𝑎⟩，support:{a}; Claim: a
+
+- When the claim of an argument A contradicts an argument B we say that A **attacks** B.
+  - **Rebuttal**: this is when the claim of an argument 𝑎𝑥 contradicts the claim of an argument 𝑎𝑦, and so leads to a symmetric attack (each argument attacks the other).
+  - **Undercut**: this is when the claim of an argument 𝑎𝑥 contradicts (some part of) the support of an argument 𝑎𝑦, leading to a one way attack from 𝑎𝑥 to 𝑎𝑦.
+  - 论据之间的攻击性，可以帮助我们决定哪些论证的子集是合理的，可以集体接受的
+
+Let Δ be a database of logic formulae. An **argument** constructed from Δ is a tuple ⟨Φ,𝜙⟩ such that:
+
+- Φ⊆Δ, 论点必须来自数据库
+- Φ⊬⊥, 
+- Φ⊢𝜙, and （支持必须包含主张）
+- there is no Φ′⊊Φ such that Φ′⊢𝜙. 
+
+What this definition says is that:
+
+- the support of the argument must come from your database,
+- the support must be consistent,
+- the support must entail the claim, and 
+- the support is a minimal set (under set inclusion) that entails the claim.
+
+For an argument 𝑎𝑟𝑔𝑥=⟨Φ,𝜙⟩, we often refer to the claim of 𝑎𝑟𝑔𝑥 as 𝑐𝑙𝑎𝑖𝑚(𝑎𝑟𝑔𝑥)=𝜙, and refer to the support of 𝑎𝑟𝑔𝑥 as 𝑠𝑢𝑝𝑝𝑜𝑟𝑡(𝑎𝑟𝑔𝑥)=Φ.
+
+## 9.1 Attacks Between Arguments
+
+ Two types of attacks: rebuttals and undercuts
+
+Let ⟨Φ1,𝜙1⟩ and ⟨Φ2,𝜙2⟩ be arguments.
+
+- ⟨Φ1,𝜙1⟩ **rebuts反驳** ⟨Φ2,𝜙2⟩ if and only if 𝜙1≡¬𝜙2
+
+- ⟨Φ1,𝜙1⟩ **undercuts削弱** ⟨Φ2,𝜙2⟩ if and only if there is some 𝜙∈Φ2 such that 𝜙1≡¬𝜙
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20211231170605039.png" alt="image-20211231170605039" style="zoom:40%;" />
+
+## 9.2 Argument Evaluation
+
+### 9.2.1 abstract argumentation graph
+
+- 当且仅当一个论点的**所有**攻击者都被标记为OUT时，该论点才被标记为IN。1⃣️
+
+- 当且仅当一个论据**至少有一个**攻击者被标记为IN时，该论据才被标记为OUT。2⃣️
+  - 论证h没有攻击者，因此显然是可接受的（IN）
+  - 因为h是可接受的，并且h攻击a，因此a是不可接受的论证，称为OUT
+  - 同样，因为h是可接受的，并且h攻击p，因此p是不可接受的OUT
+  - 因为p是不可接受的OUT，它是q的唯一攻击者，因此q是可接受的IN
+- 满足1⃣️和2⃣️的被称为COMPLETE LABELING
+
+Different **argumentation semantics** place different constraints on which of the complete labellings are valid. 
+
+- Under the **complete semantics**, any complete labelling is valid. 任何complete labelling都是complete semantics，包括grounded semantics和preferred semantics也是complete semantics
+
+- Under the **grounded semantics**, only the complete labelling that maximises (with reference to set inclusion) the arguments that are labelled as UNDEC is valid. (Note, it is guaranteed that there is always exactly one such labelling.) 让UNDEC近可能多标，IN仅可能的少
+  - An argument is **acceptable under the grounded semantics** if and only if it is labelled as IN under the grounded semantics. 
+
+- Under the **preferred semantics**, any complete labelling that maximises (with reference to set inclusion) the arguments that are labelled as IN are valid. (Note, there may be more than one such labelling.) 让IN近可能的多标
+  - Credulous可信的：出现过一次IN就可接受
+  - Sceptical怀疑的：全为IN才可接受
+
+E.g:
+
+<img src="/Users/kevin/Library/Application Support/typora-user-images/image-20220101204626402.png" alt="image-20220101204626402" style="zoom:40%;" />
+
+Grounded Accp: a1
+
+![image-20220101204722745](/Users/kevin/Library/Application Support/typora-user-images/image-20220101204722745.png)
+
+
+
+# Week10: Argumentation-based Dialogues
+
+When reasoning with argumentation, as an agent gains more knowledge it is possible that it may [retract] conclusions as well as add them. This is called [non‑monotonic] reasoning and means that the agent can change its position on things. 当用论证推理时，随着代理人获得更多的知识，它有可能[收回]结论，也可能增加结论。这被称为[非单调性]推理，意味着代理人可以改变其对事物的立场。
+
+We can use subjective [preferences] to resolve two way (symmetric) attacks in argumentation.
+
+Argumentative principles are familiar to humans. This makes argumentation well-suited to supporting [explainable] AI.
+
+An argument dialogue [protocol] defines the space of permissible dialogues; an agent uses its private [strategy] to determine which permissible move to make at any point. 
+
+A dialogue of type [inquiry] allows the agents to jointly reason.
+
+A dialogue of type [deliberation] is appropriate when the agents need to reach a decision about what to do.
+
+An agent can use its opponent model to strategise in argument dialogues. An opponent model is typically [uncertain] since agents' internal states are private. 代理人可以使用其对手模型在争论对话中制定策略。对手模型通常是[不确定]的，因为代理人的内部状态是私有的。
